@@ -297,6 +297,8 @@ void cwWallsImporter::runTask()
         cave->addTrip(trip);
     }
 
+//    StationRenamer.renameInvalidStations();
+
     done();
 }
 

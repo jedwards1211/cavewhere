@@ -39,7 +39,7 @@ int cwStationValidator::validate( QString input ) const {
  */
 QRegExp cwStationValidator::validCharactersRegex()
 {
-   return QRegExp("(?:[a-zA-Z0-9]|-|_)+");
+   return QRegExp("(?:[-_A-Z0-9])+");
 }
 
 /**
@@ -50,5 +50,5 @@ QRegExp cwStationValidator::validCharactersRegex()
  */
 QRegExp cwStationValidator::invalidCharactersRegex()
 {
-    return QRegExp("((?![a-zA-Z0-9]|-|_).)*");
+    return QRegExp("(?![^-_A-Z0-9])*");
 }

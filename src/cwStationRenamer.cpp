@@ -67,12 +67,28 @@ cwStation cwStationRenamer::createStation(QString stationName)
         QString validName = InvalidToValidStations.value(stationName);
 
         if(validName.isEmpty()) {
-            QUuid uuid = QUuid::createUuid();
-            QString uuidString = uuid.toString();
-            QStringRef removeBracets = QStringRef(&uuidString, 1, uuidString.size() - 2);
-            validName = removeBracets.toString();
+            for (int i = 0; i < stationName.length(); i++) {
+                QChar c = stationName[i];
+                validName += c.toUpper();
+                if (c.isLower()) {
+                    validName += '-';
+                }
+            }
+
+            validName.replace(QRegExp("[^-A-Za-z0-9_]"), "_");
+
+            if (ValidStations.contains(validName)) {
+                int num = 1;
+                QString numberedName;
+                do {
+                    numberedName = QString("%1_%2").arg(validName).arg(num);
+                } while (ValidStations.contains(numberedName));
+                validName = numberedName;
+            }
+
             Q_ASSERT(cwStation::nameIsValid(validName));
 
+            ValidStations << validName;
             InvalidToValidStations.insert(stationName, validName);
             ValidToInvalidStations.insert(validName, stationName);
         }
