@@ -270,7 +270,6 @@ void cwWallsImporter::runTask()
     Caves.append(cwCave());
     cwCave* cave = &Caves.last();
     cave->setName("Walls Import");
-    StationRenamer.setCave(cave);
 
     QList<cwTrip*> trips;
 
