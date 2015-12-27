@@ -6,12 +6,6 @@
 **************************************************************************/
 
 #include "cwTreeImportData.h"
-#include "cwCave.h"
-#include "cwTrip.h"
-#include "cwSurveyChunk.h"
-#include "cwTeam.h"
-#include "cwTripCalibration.h"
-#include "cwDebug.h"
 
 cwTreeImportData::cwTreeImportData(QObject* parent) :
     QObject(parent)

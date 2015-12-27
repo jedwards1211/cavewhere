@@ -6,6 +6,7 @@
 **************************************************************************/
 #include "cwSurvexGlobalData.h"
 #include "cwTreeImportDataNode.h"
+#include "cwCavingRegion.h"
 #include "cwCave.h"
 #include "cwTrip.h"
 #include "cwSurveyChunk.h"
@@ -29,16 +30,15 @@ cwSurvexNodeData* cwSurvexGlobalData::nodeData(cwTreeImportDataNode *node)
     return NodeData[node];
 }
 
-/**
-  \brief Get's all the cave data from this object
-  */
-QList<cwCave*> cwSurvexGlobalData::caves() {
+void cwSurvexGlobalData::importInto(cwCavingRegion *region) {
     QList<cwCave*> caves;
     foreach(cwTreeImportDataNode* block, nodes()) {
         cavesHelper(&caves, block, nullptr, nullptr);
     }
 
-    return caves;
+    if (!caves.isEmpty()) {
+        region->addCaves(caves);
+    }
 }
 
 /**

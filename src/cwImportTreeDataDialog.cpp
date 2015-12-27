@@ -292,11 +292,15 @@ cwImportTreeDataDialog::TypeItem cwImportTreeDataDialog::importTypeToTypeItem(in
 void cwImportTreeDataDialog::import() {
     cwTreeImportData* globalData = Importer->data();
 
-    if(!globalData->caves().isEmpty()) {
-        beginUndoMacro("Import survex");
-        Region->addCaves(globalData->caves());
-        endUndoMacro();
-    }
+    beginUndoMacro("Import data");
+    globalData->importInto(Region);
+    endUndoMacro();
+
+//    if(!globalData->caves().isEmpty()) {
+//        beginUndoMacro("Import survex");
+//        Region->addCaves(globalData->caves());
+//        endUndoMacro();
+//    }
     accept();
 }
 

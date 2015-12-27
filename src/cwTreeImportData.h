@@ -10,16 +10,11 @@
 
 //Our includes
 #include "cwTreeImportDataNode.h"
-class cwCave;
-class cwTrip;
-class cwSurveyChunk;
-#include "cwStation.h"
-#include "cwUndoer.h"
+class cwCavingRegion;
 
 //Qt includes
 #include <QObject>
 #include <QList>
-#include <QStringList>
 
 class cwTreeImportData : public QObject
 {
@@ -29,7 +24,7 @@ public:
     QList<cwTreeImportDataNode*> nodes() const;
     void setNodes(QList<cwTreeImportDataNode*> nodes);
 
-    virtual QList<cwCave*> caves() = 0;
+    virtual void importInto(cwCavingRegion* region) = 0;
 
 private:
     QList<cwTreeImportDataNode*> RootNodes;

@@ -1,4 +1,5 @@
 #include "cwWallsImportData.h"
+#include "cwCavingRegion.h"
 #include "cwCave.h"
 #include "cwTrip.h"
 #include "cwTeam.h"
@@ -11,16 +12,15 @@ cwWallsImportData::cwWallsImportData(QObject* parent)
 
 }
 
-/**
-  \brief Get's all the cave data from this object
-  */
-QList<cwCave*> cwWallsImportData::caves() {
+void cwWallsImportData::importInto(cwCavingRegion *region) {
     QList<cwCave*> caves;
     foreach(cwTreeImportDataNode* block, nodes()) {
         cavesHelper(&caves, block, nullptr, nullptr);
     }
 
-    return caves;
+    if (!caves.isEmpty()) {
+        region->addCaves(caves);
+    }
 }
 
 /**
