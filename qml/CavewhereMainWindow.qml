@@ -22,9 +22,12 @@ ApplicationWindow {
     title: "Cavewhere - " + version
     //    anchors.fill: parent;
 
-    LicenseWindow { }
-
-
+    Loader {
+        source: "LicenseWindow.qml"
+        visible: !license.hasReadLicenseAgreement
+        active: visible
+        asynchronous: true
+    }
 
     menuBar: FileButtonAndMenu {
         id: fileMenuButton
@@ -48,7 +51,7 @@ ApplicationWindow {
         id: loadMainContentsId
         source: "MainContent.qml"
         anchors.fill: parent
-        asynchronous: false //FIXME: Once https://bugreports.qt-project.org/browse/QTBUG-36410 is fixed turn this to true
+        asynchronous: true
         visible: status == Loader.Ready
 
 //        onLoaded: {
@@ -85,7 +88,9 @@ ApplicationWindow {
         nameFilters: ["Cavewhere Project (*.cw)"]
         title: "Save Cavewhere Project As"
         selectExisting: false
+        folder: rootData.lastDirectory
         onAccepted: {
+            rootData.lastDirectory = fileUrl
             project.saveAs(fileUrl)
         }
     }
@@ -93,7 +98,9 @@ ApplicationWindow {
     FileDialog {
         id: loadFileDialogId
         nameFilters: ["Cavewhere File (*.cw)"]
+        folder: rootData.lastDirectory
         onAccepted: {
+            rootData.lastDirectory = fileUrl
             rootData.pageSelectionModel.clearHistory();
             rootData.pageSelectionModel.gotoPageByName(null, "View")
             rootData.project.loadFile(fileUrl)

@@ -52,6 +52,7 @@ cwLinePlotTask::cwLinePlotTask(QObject *parent) :
 
     SurvexFile = new QTemporaryFile(this);
     SurvexFile->open();
+    SurvexFile->setAutoRemove(false);
     SurvexFile->close();
 
     SurvexExporter = new cwSurvexExporterRegionTask();

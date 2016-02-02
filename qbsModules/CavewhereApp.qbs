@@ -43,6 +43,10 @@ Application {
         buildDirectory + "/versionInfo"
     ]
 
+    cpp.rpaths: [
+        Qt.core.libPath
+    ]
+
     Properties {
         condition: qbs.targetOS.contains("osx")
 
@@ -56,12 +60,30 @@ Application {
     }
 
     Properties {
-        condition: qbs.targetOS.contains("osx") || qbs.targetOS.contains("linux")
-        cpp.cxxFlags: [
-            "-stdlib=libc++", //Needed for protoc
-            "-std=c++11", //For c++11 support
-            "-Werror" //Treat warnings as errors
-        ]
+        condition: qbs.targetOS.contains("osx")
+        cpp.cxxFlags: {
+            var flags = [
+                        "-stdlib=libc++", //Needed for protoc
+                        "-std=c++11", //For c++11 support
+                        "-Werror", //Treat warnings as errors
+
+                    ];
+
+            if(qbs.buildVariant == "debug") {
+                flags.push(["-fsanitize=address",
+                            "-fno-omit-frame-pointer"]);
+            }
+
+            return flags;
+        }
+
+        cpp.linkerFlags: {
+            var flags = [];
+            if(qbs.buildVariant == "debug") {
+                flags.push("-fsanitize=address")
+            }
+            return flags;
+        }
     }
 
     Properties {
@@ -95,8 +117,6 @@ Application {
         ]
     }
 
-
-//        cpp.infoPlistFile: "Info.plist"
     cpp.minimumOsxVersion: "10.7"
 
     Group {
