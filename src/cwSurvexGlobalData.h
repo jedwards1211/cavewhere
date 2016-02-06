@@ -29,6 +29,7 @@ public:
     cwSurvexGlobalData(QObject* object);
 
     void importInto(cwCavingRegion *region);
+    bool canImport();
 
     cwSurvexNodeData* nodeData(cwTreeImportDataNode* node);
 

@@ -25,6 +25,7 @@ public:
     void setNodes(QList<cwTreeImportDataNode*> nodes);
 
     virtual void importInto(cwCavingRegion* region) = 0;
+    virtual bool canImport() = 0;
 
 private:
     QList<cwTreeImportDataNode*> RootNodes;

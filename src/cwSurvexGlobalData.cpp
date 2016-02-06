@@ -41,6 +41,15 @@ void cwSurvexGlobalData::importInto(cwCavingRegion *region) {
     }
 }
 
+bool cwSurvexGlobalData::canImport() {
+    QList<cwCave*> caves;
+    foreach(cwTreeImportDataNode* block, nodes()) {
+        cavesHelper(&caves, block, nullptr, nullptr);
+    }
+
+    return !caves.isEmpty();
+}
+
 /**
   \brief Helper function the caves function
   */
