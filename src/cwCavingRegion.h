@@ -30,7 +30,7 @@ class CAVEWHERE_LIB_EXPORT cwCavingRegion : public QAbstractListModel, public cw
     Q_ENUMS(Roles)
 public:
     enum Roles {
-        CaveObjectRole
+        CaveObjectRole = Qt::UserRole + 1,
     };
 
     explicit cwCavingRegion(QObject *parent = nullptr);

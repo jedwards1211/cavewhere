@@ -10,6 +10,8 @@
 
 //Our includes
 class cwSurveyChunk;
+class cwCave;
+class cwTrip;
 class cwShot;
 class cwTeam;
 class cwTripCalibration;
@@ -36,8 +38,10 @@ class cwTreeImportDataNode : public QObject
 public:
     enum ImportType {
         NoImport, //!< Don't import this block
-        Cave, //!< This block is a cave
-        Trip, //!< This block is a trip
+        ExistingTrip, //!< Don't import this block, data already exists
+        NewCave, //!< This block is a cave
+        AddToCave, //!< This block contains trips to add to a cave
+        ReplaceTrip, //!< This block replaces existing trip data
         Structure //!< This is neither a Cave nor a Trip, but a imported survex block
     };
 
@@ -55,6 +59,12 @@ public:
 
     void setName(QString name);
     QString name() const;
+
+    void setTargetCave(cwCave* targetCave);
+    cwCave* targetCave() const;
+
+    void setTargetTrip(cwTrip* targetTrip);
+    cwTrip* targetTrip() const;
 
     void setDate(QDate date);
     QDate date() const;
@@ -92,6 +102,8 @@ private:
     //Mutible elements
     QString Name;
     ImportType Type;
+    cwCave* TargetCave;
+    cwTrip* TargetTrip;
 
     QDate Date;
     cwTeam* Team;

@@ -190,6 +190,8 @@ QVariant cwCave::data(const QModelIndex &index, int role) const
    }
 
    switch(role) {
+   case Qt::DisplayRole:
+       return QVariant(Trips[index.row()]->name());
    case TripObjectRole:
        return QVariant::fromValue(Trips.at(index.row()));
    default:
@@ -206,6 +208,7 @@ QVariant cwCave::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> cwCave::roleNames() const
 {
     QHash<int, QByteArray> roles;
+    roles.insert(Qt::DisplayRole, "display");
     roles.insert(TripObjectRole, "tripObjectRole");
     return roles;
 }

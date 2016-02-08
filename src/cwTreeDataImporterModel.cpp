@@ -123,18 +123,20 @@ QVariant cwTreeDataImporterModel::NameColumnIconData(const QModelIndex& index) c
 
         switch(node->importType()) {
         case cwTreeImportDataNode::NoImport:
+        case cwTreeImportDataNode::ExistingTrip:
             if(!QPixmapCache::find(cwGlobalIcons::NoImport, &icon)) {
                 icon = QPixmap(cwGlobalIcons::NoImportFilename);
                 cwGlobalIcons::NoImport = QPixmapCache::insert(icon);
             }
             break;
-        case cwTreeImportDataNode::Trip:
+        case cwTreeImportDataNode::AddToCave:
+        case cwTreeImportDataNode::ReplaceTrip:
             if(!QPixmapCache::find(cwGlobalIcons::Trip, &icon)) {
                 icon = QPixmap(cwGlobalIcons::TripFilename);
                 cwGlobalIcons::Trip = QPixmapCache::insert(icon);
             }
             break;
-        case cwTreeImportDataNode::Cave:
+        case cwTreeImportDataNode::NewCave:
             if(!QPixmapCache::find(cwGlobalIcons::Cave, &icon)) {
                 icon = QPixmap(cwGlobalIcons::CaveFilename);
                 cwGlobalIcons::Cave = QPixmapCache::insert(icon);

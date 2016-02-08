@@ -6,6 +6,7 @@
 **************************************************************************/
 
 //Our includes
+#include <QStandardItemModel>
 #include "cwImportTreeDataDialog.h"
 #include "cwTreeDataImporterModel.h"
 #include "cwTreeDataImporter.h"
@@ -16,6 +17,8 @@
 #include "cwTaskProgressDialog.h"
 #include "cwStringListErrorModel.h"
 #include "cwGlobalUndoStack.h"
+#include "cwCave.h"
+#include "cwTrip.h"
 
 //Qt includes
 #include <QFileSystemModel>
@@ -32,7 +35,8 @@ cwImportTreeDataDialog::cwImportTreeDataDialog(Names names, cwTreeDataImporter* 
     Model(new cwTreeDataImporterModel(this)),
     Importer(importer),
     SurvexSelectionModel(new QItemSelectionModel(Model, this)),
-    ImportThread(new QThread(this))
+    ImportThread(new QThread(this)),
+    Updating(false)
 {
     setupUi(this);
     tabWidget->setTabText(tabWidget->indexOf(SurvexErrorsWidget), QApplication::translate("cwImportTreeDataDialog",
@@ -52,12 +56,20 @@ cwImportTreeDataDialog::cwImportTreeDataDialog(Names names, cwTreeDataImporter* 
 
     connect(Model, &cwTreeDataImporterModel::dataChanged, this, &cwImportTreeDataDialog::updateImportButton);
 
+    connect(TargetCaveComboBox, SIGNAL(currentIndexChanged(int)), SLOT(targetCaveChanged(int)));
+    connect(TargetTripComboBox, SIGNAL(currentIndexChanged(int)), SLOT(targetTripChanged(int)));
+
     SurvexTreeView->setModel(Model);
     SurvexTreeView->setSelectionModel(SurvexSelectionModel);
     SurvexTreeView->setHeaderHidden(true);
     SurvexTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     TypeComboBox->setEnabled(false);
+
+    if (Region != nullptr) {
+        TargetCaveComboBox->setModel(Region);
+        TargetCaveComboBox->setRootModelIndex(QModelIndex());
+    }
 
     splitter->setStretchFactor(1, 4);
 
@@ -67,6 +79,8 @@ cwImportTreeDataDialog::cwImportTreeDataDialog(Names names, cwTreeDataImporter* 
     setWindowTitle(names.windowTitle);
 
     updateImportButton(Model->index(0, 0), Model->index(Model->rowCount() - 1, 0));
+    updateCurrentItem(QItemSelection(), QItemSelection());
+    updateTargets();
 }
 
 cwImportTreeDataDialog::~cwImportTreeDataDialog() {
@@ -159,11 +173,15 @@ void cwImportTreeDataDialog::setupTypeComboBox() {
     }
 
     TypeComboBox->setItemIcon((int)NoImportItem, QIcon(dontImportIcon));
-    TypeComboBox->setItemText((int)NoImportItem, cwTreeImportDataNode::importTypeToString(cwTreeImportDataNode::NoImport));
-    TypeComboBox->setItemIcon((int)CaveItem, QIcon(caveIcon));
-    TypeComboBox->setItemText((int)CaveItem, cwTreeImportDataNode::importTypeToString(cwTreeImportDataNode::Cave));
-    TypeComboBox->setItemIcon((int)TripItem, QIcon(tripIcon));
-    TypeComboBox->setItemText((int)TripItem, cwTreeImportDataNode::importTypeToString(cwTreeImportDataNode::Trip));
+    TypeComboBox->setItemText((int)NoImportItem, "Don't Import");
+    TypeComboBox->setItemIcon((int)ExistingTripItem, QIcon(dontImportIcon));
+    TypeComboBox->setItemText((int)ExistingTripItem, "Data already exists");
+    TypeComboBox->setItemIcon((int)NewCaveItem, QIcon(caveIcon));
+    TypeComboBox->setItemText((int)NewCaveItem, "Import as New Cave");
+    TypeComboBox->setItemIcon((int)NewTripItem, QIcon(tripIcon));
+    TypeComboBox->setItemText((int)NewTripItem, "Import as New Trip in Existing Cave");
+    TypeComboBox->setItemIcon((int)ReplaceTripItem, QIcon(tripIcon));
+    TypeComboBox->setItemText((int)ReplaceTripItem, "Replace Existing Trip Data");
     TypeComboBox->setCurrentIndex(-1);
 
     connect(TypeComboBox, SIGNAL(activated(int)), SLOT(setType(int)));
@@ -209,8 +227,11 @@ void cwImportTreeDataDialog::updateImportWarningLabel() {
 /**
   \brief Updates this view with the current items that are selected
   */
-void cwImportTreeDataDialog::updateCurrentItem(QItemSelection selected, QItemSelection /*deselected*/) {
-    QModelIndexList selectedIndexes = selected.indexes();
+void cwImportTreeDataDialog::updateCurrentItem(QItemSelection /*selected*/, QItemSelection /*deselected*/) {
+    updateTargets();
+
+//    QModelIndexList selectedIndexes = selected.indexes();
+    QModelIndexList selectedIndexes = SurvexSelectionModel->selection().indexes();
     if(selectedIndexes.size() == 1) {
         //Only one item selected
         QModelIndex index = selectedIndexes.first();
@@ -221,22 +242,64 @@ void cwImportTreeDataDialog::updateCurrentItem(QItemSelection selected, QItemSel
             TypeItem item = importTypeToTypeItem(block->importType());
             TypeComboBox->setCurrentIndex(item);
 
-            //Set the text for the combo box
-            QString name = block->name();
-            QString noImportStrting = QString("%1 %2").arg(cwTreeImportDataNode::importTypeToString(cwTreeImportDataNode::NoImport)).arg(name);
-            QString caveString  = QString("%1 is a %2").arg(name).arg(cwTreeImportDataNode::importTypeToString(cwTreeImportDataNode::Cave));
-            QString tripString = QString("%1 is a %2").arg(name).arg(cwTreeImportDataNode::importTypeToString(cwTreeImportDataNode::Trip));
+//            //Set the text for the combo box
+//            QString name = block->name();
+//            QString noImportStrting = QString("%1 %2").arg(cwTreeImportDataNode::importTypeToString(cwTreeImportDataNode::NoImport)).arg(name);
+//            QString caveString  = QString("%1 is a %2").arg(name).arg(cwTreeImportDataNode::importTypeToString(cwTreeImportDataNode::NewCave));
+//            QString tripString = QString("%1 is a %2").arg(name).arg(cwTreeImportDataNode::importTypeToString(cwTreeImportDataNode::NewTrip));
+//            QString existingTripString = QString("%1 should %2").arg(name).arg(cwTreeImportDataNode::importTypeToString(cwTreeImportDataNode::ReplaceTrip));
 
-            TypeComboBox->setItemText((int)NoImportItem, noImportStrting);
-            TypeComboBox->setItemText((int)CaveItem, caveString);
-            TypeComboBox->setItemText((int)TripItem, tripString);
+//            TypeComboBox->setItemText((int)NoImportItem, noImportStrting);
+//            TypeComboBox->setItemText((int)NewCaveItem, caveString);
+//            TypeComboBox->setItemText((int)NewTripItem, tripString);
+//            TypeComboBox->setItemText((int)ReplaceTripItem, existingTripString);
             TypeComboBox->setEnabled(true);
+
             return;
         }
     }
 
     TypeComboBox->setEnabled(false);
     TypeComboBox->setCurrentIndex(-1);
+}
+
+void cwImportTreeDataDialog::updateTargets() {
+    Updating = true;
+
+    try {
+        QModelIndexList selectedIndexes = SurvexSelectionModel->selection().indexes();
+        cwTreeImportDataNode* block = nullptr;
+        if(selectedIndexes.size() == 1) {
+            QModelIndex index = selectedIndexes.first();
+            block = Model->toNode(index);
+        }
+
+        TargetCaveLabel->setVisible(block != nullptr && (
+                    block->importType() == cwTreeImportDataNode::AddToCave ||
+                    block->importType() == cwTreeImportDataNode::ReplaceTrip));
+        TargetCaveComboBox->setVisible(TargetCaveLabel->isVisible());
+        int caveIndex = block == nullptr ? -1 : Region->indexOf(block->targetCave());
+        TargetCaveComboBox->setCurrentIndex(caveIndex);
+
+        TargetTripLabel->setVisible(block != nullptr &&
+                block->importType() == cwTreeImportDataNode::ReplaceTrip);
+        TargetTripComboBox->setVisible(TargetTripLabel->isVisible());
+        if (block != nullptr && block->targetCave() != nullptr) {
+            TargetTripComboBox->setModel(block->targetCave());
+            int tripIndex = block->targetTrip() == nullptr ?
+                        -1 : block->targetCave()->indexOf(block->targetTrip());
+            TargetTripComboBox->setCurrentIndex(tripIndex);
+        }
+        else {
+            TargetTripComboBox->setModel(new QStandardItemModel);
+        }
+    }
+    catch (...) {
+        Updating = false;
+        throw;
+    }
+
+    Updating = false;
 }
 
 /**
@@ -256,6 +319,8 @@ void cwImportTreeDataDialog::setType(int index) {
             block->setImportType(importType);
         }
     }
+
+    updateTargets();
 }
 
 
@@ -266,10 +331,14 @@ int cwImportTreeDataDialog::typeItemToImportType(TypeItem typeItem) const {
     switch(typeItem) {
     case NoImportItem:
         return cwTreeImportDataNode::NoImport;
-    case CaveItem:
-        return cwTreeImportDataNode::Cave;
-    case TripItem:
-        return cwTreeImportDataNode::Trip;
+    case ExistingTripItem:
+        return cwTreeImportDataNode::ExistingTrip;
+    case NewCaveItem:
+        return cwTreeImportDataNode::NewCave;
+    case NewTripItem:
+        return cwTreeImportDataNode::AddToCave;
+    case ReplaceTripItem:
+        return cwTreeImportDataNode::ReplaceTrip;
     default:
         return -1;
     }
@@ -282,10 +351,14 @@ cwImportTreeDataDialog::TypeItem cwImportTreeDataDialog::importTypeToTypeItem(in
     switch(type) {
     case cwTreeImportDataNode::NoImport:
         return NoImportItem;
-    case cwTreeImportDataNode::Cave:
-        return CaveItem;
-    case cwTreeImportDataNode::Trip:
-        return TripItem;
+    case cwTreeImportDataNode::ExistingTrip:
+        return ExistingTripItem;
+    case cwTreeImportDataNode::NewCave:
+        return NewCaveItem;
+    case cwTreeImportDataNode::AddToCave:
+        return NewTripItem;
+    case cwTreeImportDataNode::ReplaceTrip:
+        return ReplaceTripItem;
     }
     return (cwImportTreeDataDialog::TypeItem)-1;
 }
@@ -316,6 +389,8 @@ void cwImportTreeDataDialog::import() {
 void cwImportTreeDataDialog::importerFinishedRunning() {
     //Move the importer back to this thread
     Importer->setThread(thread(), Qt::BlockingQueuedConnection);
+
+    Importer->data()->moveToThread(thread());
 
     //Get the importer's data
     Model->setTreeImportData(Importer->data());
@@ -356,33 +431,43 @@ void cwImportTreeDataDialog::importerCanceled() {
  *
  * This updates the import button enable / disable
  */
-void cwImportTreeDataDialog::updateImportButton(QModelIndex begin, QModelIndex end)
+void cwImportTreeDataDialog::updateImportButton(QModelIndex /*begin*/, QModelIndex /*end*/)
 {
-    //See if the user has selected to import the cave or a trip
-    bool enableImportButton = false;
-    if(begin.isValid() && end.isValid()) {
-        for(int i = begin.row(); i <= end.row(); i++) {
-            QModelIndex index = Model->index(i, 0, begin.parent());
-            cwTreeImportDataNode* node = Model->toNode(index);
-            if(node->importType() == cwTreeImportDataNode::Cave
-                    || node->importType() == cwTreeImportDataNode::Trip)
-            {
-                enableImportButton = true;
-                break;
-            }
-        }
-    }
+    ImportButton->setEnabled(Importer->data()->canImport());
 
-    if(!enableImportButton) {
-        //Make sure all nodes are disabled
-        enableImportButton = !Importer->data()->canImport();
-    }
-
-    ImportButton->setEnabled(enableImportButton);
-
-    if(!enableImportButton) {
+    if(!ImportButton->isEnabled()) {
         HintLabel->setText("You need to select which caves you want to import");
     } else {
         HintLabel->setText(QString());
+    }
+}
+
+void cwImportTreeDataDialog::targetCaveChanged(int index) {
+    if (Updating) return;
+
+    QModelIndexList selectedIndexes = SurvexSelectionModel->selection().indexes();
+    cwTreeImportDataNode* block = nullptr;
+    if(selectedIndexes.size() == 1) {
+        QModelIndex index = selectedIndexes.first();
+        block = Model->toNode(index);
+    }
+    if (block != nullptr && index < Region->caveCount()) {
+        block->setTargetCave(Region->cave(index));
+        updateTargets();
+    }
+}
+
+void cwImportTreeDataDialog::targetTripChanged(int index) {
+    if (Updating) return;
+
+    QModelIndexList selectedIndexes = SurvexSelectionModel->selection().indexes();
+    cwTreeImportDataNode* block = nullptr;
+    if(selectedIndexes.size() == 1) {
+        QModelIndex index = selectedIndexes.first();
+        block = Model->toNode(index);
+    }
+    if (block != nullptr && block->targetCave() != nullptr && index < block->targetCave()->tripCount()) {
+        block->setTargetTrip(block->targetCave()->trip(index));
+        updateTargets();
     }
 }

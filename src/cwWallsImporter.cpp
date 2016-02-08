@@ -29,7 +29,8 @@ cwUnits::LengthUnit cwUnit(Length::Unit dewallsUnit)
 }
 
 WallsImporterVisitor::WallsImporterVisitor(WallsSurveyParser* parser, cwWallsImporter* importer, QString tripNamePrefix)
-    : Parser(parser),
+    : QObject(importer),
+      Parser(parser),
       Importer(importer),
       TripNamePrefix(tripNamePrefix),
       Trips(QList<cwTripPtr>()),
@@ -303,7 +304,7 @@ void WallsImporterVisitor::message(WallsMessage message)
 
 cwWallsImporter::cwWallsImporter(QObject *parent) :
     cwTreeDataImporter(parent),
-    GlobalData(new cwWallsImportData(this)),
+    GlobalData(new cwWallsImportData()),
     EmittedWarnings()
 {
 }
@@ -393,7 +394,7 @@ void cwWallsImporter::clear() {
 void cwWallsImporter::importWalls(QStringList filenames) {
     clear();
 
-    cwTreeImportDataNode* rootBlock = new cwTreeImportDataNode(nullptr);
+    cwTreeImportDataNode* rootBlock = new cwTreeImportDataNode();
 
     foreach(QString filename, filenames) {
         cwTreeImportDataNode* block;

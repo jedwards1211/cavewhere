@@ -31,10 +31,10 @@ public:
     void importInto(cwCavingRegion *region);
     bool canImport();
 
-    cwSurvexNodeData* nodeData(cwTreeImportDataNode* node);
+    cwSurvexNodeData* nodeData(cwTreeImportDataNode* node) const;
 
 private:
-    QHash<cwTreeImportDataNode*, cwSurvexNodeData*> NodeData;
+    mutable QHash<cwTreeImportDataNode*, cwSurvexNodeData*> NodeData;
 
     void cavesHelper(QList<cwCave*>* caves, cwTreeImportDataNode* currentBlock, cwCave* currentCave, cwTrip* trip);
 

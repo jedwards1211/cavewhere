@@ -24,6 +24,8 @@ public:
     void setJobs(QStringList jobs);
     QStringList jobs() const;
 
+    void merge(cwTeamMember other);
+
 private:
     QString Name;
     QStringList Jobs;

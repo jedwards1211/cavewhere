@@ -39,7 +39,7 @@ class CAVEWHERE_LIB_EXPORT cwCave : public QAbstractListModel, public cwUndoer
     Q_ENUMS(Roles)
 public:
     enum Roles {
-        TripObjectRole
+        TripObjectRole = Qt::UserRole + 1,
     };
 
     explicit cwCave(QObject* parent = nullptr);

@@ -11,6 +11,8 @@
 //Our includes
 #include "cwTreeImportDataNode.h"
 class cwCavingRegion;
+class cwCave;
+class cwTrip;
 
 //Qt includes
 #include <QObject>
@@ -24,11 +26,19 @@ public:
     QList<cwTreeImportDataNode*> nodes() const;
     void setNodes(QList<cwTreeImportDataNode*> nodes);
 
-    virtual void importInto(cwCavingRegion* region) = 0;
-    virtual bool canImport() = 0;
+    virtual void importInto(cwCavingRegion* region);
+    virtual bool canImport();
+
+    virtual cwCave* toCave(cwTreeImportDataNode* node);
+    virtual cwTrip* toTrip(cwTreeImportDataNode* node);
 
 private:
     QList<cwTreeImportDataNode*> RootNodes;
+
+    virtual void toTripHelper(cwTrip* trip, cwTreeImportDataNode* node);
+    bool canImportHelper(cwTreeImportDataNode* node);
+
+    virtual void importIntoHelper(cwCavingRegion* region, cwTreeImportDataNode* node);
 };
 
 inline QList<cwTreeImportDataNode*> cwTreeImportData::nodes() const {

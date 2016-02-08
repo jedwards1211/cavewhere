@@ -108,3 +108,19 @@ void cwTeam::removeTeamMember(int row) {
     Team.removeAt(row);
     endRemoveRows();
 }
+
+void cwTeam::merge(const cwTeam &other) {
+    QHash<QString, int> hash;
+    for (int i = 0; i < Team.length(); i++) {
+        hash[Team[i].name().toLower()] = i;
+    }
+
+    foreach (cwTeamMember member, other.teamMembers()) {
+        if (hash.contains(member.name().toLower())) {
+            Team[hash[member.name().toLower()]].merge(member);
+        }
+        else {
+            Team << member;
+        }
+    }
+}

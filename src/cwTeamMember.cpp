@@ -28,3 +28,13 @@ void cwTeamMember::setName(QString name) {
 void cwTeamMember::setJobs(QStringList roles)  {
     Jobs = roles;
 }
+
+void cwTeamMember::merge(cwTeamMember other) {
+    if (other.name().compare(Name, Qt::CaseInsensitive) == 0) {
+        foreach (QString job, other.jobs()) {
+            if (!Jobs.contains(job, Qt::CaseInsensitive)) {
+                Jobs << job;
+            }
+        }
+    }
+}

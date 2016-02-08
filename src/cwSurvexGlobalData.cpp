@@ -21,7 +21,7 @@ cwSurvexGlobalData::cwSurvexGlobalData(QObject* parent) :
 
 }
 
-cwSurvexNodeData* cwSurvexGlobalData::nodeData(cwTreeImportDataNode *node)
+cwSurvexNodeData* cwSurvexGlobalData::nodeData(cwTreeImportDataNode *node) const
 {
     if (!NodeData.contains(node)) {
         cwSurvexNodeData* result = new cwSurvexNodeData(node);
@@ -61,7 +61,7 @@ void cwSurvexGlobalData::cavesHelper(QList<cwCave*>* caves,
     switch(currentBlock->importType()) {
     case cwTreeImportDataNode::NoImport:
         break;
-    case cwTreeImportDataNode::Cave:
+    case cwTreeImportDataNode::NewCave:
         currentCave = new cwCave(this);
 
         currentCave->setName(currentBlock->name());
@@ -72,7 +72,7 @@ void cwSurvexGlobalData::cavesHelper(QList<cwCave*>* caves,
         populateEquateMap(currentBlock);
 
         break;
-    case cwTreeImportDataNode::Trip: {
+    case cwTreeImportDataNode::AddToCave: {
         currentTrip = new cwTrip(this);
 
         //Copy the name and date
@@ -102,7 +102,7 @@ void cwSurvexGlobalData::cavesHelper(QList<cwCave*>* caves,
         //Adds the trip to the current cave
         currentCave->addTrip(currentTrip);
     }
-    case cwTreeImportDataNode::Structure:
+    default:
         break;
     }
 
@@ -156,7 +156,7 @@ void cwSurvexGlobalData::fixStationNames(cwSurveyChunk *chunk, cwTreeImportDataN
     //Move to block that has a name
     while(current != nullptr &&
           current->name().isEmpty() &&
-          current->importType() != cwTreeImportDataNode::Cave)
+          current->importType() != cwTreeImportDataNode::NewCave)
     {
         current = current->parentNode();
     }
@@ -171,7 +171,7 @@ void cwSurvexGlobalData::fixStationNames(cwSurveyChunk *chunk, cwTreeImportDataN
     //Find the parent cave chuck block
     cwTreeImportDataNode* caveSurvexBlock = chunkBlock;
     while(caveSurvexBlock != nullptr) {
-        if(caveSurvexBlock->importType() == cwTreeImportDataNode::Cave) {
+        if(caveSurvexBlock->importType() == cwTreeImportDataNode::NewCave) {
             break;
         } else {
             if(!caveSurvexBlock->name().isEmpty()) {

@@ -7,6 +7,8 @@
 
 //Our includes
 #include "cwTreeImportDataNode.h"
+#include "cwCave.h"
+#include "cwTrip.h"
 #include "cwSurveyChunk.h"
 #include "cwStation.h"
 #include "cwTeam.h"
@@ -16,6 +18,8 @@ cwTreeImportDataNode::cwTreeImportDataNode(QObject* parent) :
     QObject(parent),
     ParentNode(nullptr),
     Type(NoImport),
+    TargetCave(nullptr),
+    TargetTrip(nullptr),
     Team(new cwTeam(this)),
     Calibration(new cwTripCalibration(this)),
     IncludeDistance(true)
@@ -46,6 +50,29 @@ cwTreeImportDataNode::cwTreeImportDataNode(QObject* parent) :
      }
  }
 
+ cwCave* cwTreeImportDataNode::targetCave() const {
+     return TargetCave;
+ }
+
+ void cwTreeImportDataNode::setTargetCave(cwCave *targetCave) {
+     if (TargetCave != targetCave) {
+         TargetTrip = nullptr;
+         TargetCave = targetCave;
+         emit importTypeChanged();
+     }
+ }
+
+ cwTrip* cwTreeImportDataNode::targetTrip() const {
+     return TargetTrip;
+ }
+
+ void cwTreeImportDataNode::setTargetTrip(cwTrip *targetTrip) {
+     if (TargetTrip != targetTrip) {
+         TargetTrip = targetTrip;
+         emit importTypeChanged();
+     }
+ }
+
  /**
    \brief Sets how this block will be exported
    */
@@ -58,7 +85,7 @@ cwTreeImportDataNode::cwTreeImportDataNode(QObject* parent) :
          foreach(cwTreeImportDataNode* child, ChildNodes) {
              if(Type != NoImport) {
                  if(child->isTrip()) {
-                     child->setImportType(Trip);
+                     child->setImportType(AddToCave);
                  } else {
                      child->setImportType(Structure);
                  }
@@ -75,7 +102,7 @@ cwTreeImportDataNode::cwTreeImportDataNode(QObject* parent) :
  bool cwTreeImportDataNode::isTrip() const {
      cwTreeImportDataNode* parent = parentNode();
      while(parent != nullptr) {
-         if(parent->importType() == Trip) {
+         if(parent->importType() == AddToCave) {
              return false;
          }
          parent = parent->parentNode();
@@ -91,10 +118,14 @@ cwTreeImportDataNode::cwTreeImportDataNode(QObject* parent) :
      switch(type) {
      case NoImport:
          return QString("Don't Import");
-     case Cave:
-         return QString("Cave");
-     case Trip:
-         return QString("Trip");
+     case ExistingTrip:
+         return QString("Trip already exists");
+     case NewCave:
+         return QString("New Cave");
+     case AddToCave:
+         return QString("New Trip");
+     case ReplaceTrip:
+         return QString("Replace Existing Trip");
      default:
          break;
      }
@@ -188,5 +219,3 @@ cwTreeImportDataNode::cwTreeImportDataNode(QObject* parent) :
      }
      return -1;
  }
-
-

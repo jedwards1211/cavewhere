@@ -36,6 +36,8 @@ public:
 
     Q_INVOKABLE void removeTeamMember(int row);
 
+    void merge(const cwTeam& other);
+
     void setTeamMembers(QList<cwTeamMember> team);
     QList<cwTeamMember> teamMembers() const;
 

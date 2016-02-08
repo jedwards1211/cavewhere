@@ -50,8 +50,10 @@ private:
     enum TypeItem {
         Invalid = -1,
         NoImportItem,
-        CaveItem,
-        TripItem,
+        ExistingTripItem,
+        NewCaveItem,
+        NewTripItem,
+        ReplaceTripItem,
         NumberOfItems
     };
 
@@ -73,9 +75,14 @@ private:
 
     void updateImportWarningLabel();
 
+    bool Updating;
+
 private slots:
     void updateCurrentItem(QItemSelection selected, QItemSelection deselected);
+    void updateTargets();
     void setType(int index);
+    void targetCaveChanged(int index);
+    void targetTripChanged(int index);
 
     TypeItem importTypeToTypeItem(int type) const;
     int typeItemToImportType(TypeItem typeItem) const;

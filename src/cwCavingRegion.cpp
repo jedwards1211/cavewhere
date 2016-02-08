@@ -60,6 +60,8 @@ QVariant cwCavingRegion::data(const QModelIndex &index, int role) const
     }
 
     switch(role) {
+    case Qt::DisplayRole:
+        return QVariant(Caves[index.row()]->name());
     case CaveObjectRole:
         return QVariant::fromValue(Caves.at(index.row()));
     }
@@ -74,6 +76,7 @@ QVariant cwCavingRegion::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> cwCavingRegion::roleNames() const
 {
     QHash<int, QByteArray> roles;
+    roles.insert(Qt::DisplayRole, "display");
     roles.insert(CaveObjectRole, "caveObjectRole");
     return roles;
 }

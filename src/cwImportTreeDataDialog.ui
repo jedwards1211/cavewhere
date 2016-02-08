@@ -42,28 +42,9 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QComboBox" name="TypeComboBox"/>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <property name="spacing">
-          <number>-1</number>
-         </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
-          <widget class="QLabel" name="CaveLabel">
-           <property name="minimumSize">
-            <size>
-             <width>50</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Cave: </string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="CaveComboBox">
+          <widget class="QComboBox" name="TypeComboBox">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>1</horstretch>
@@ -75,25 +56,55 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <layout class="QHBoxLayout" name="TargetCaveLayout" stretch="0,1">
          <property name="spacing">
           <number>-1</number>
          </property>
          <item>
-          <widget class="QLabel" name="TripLabel">
+          <widget class="QLabel" name="TargetCaveLabel">
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>70</width>
              <height>0</height>
             </size>
            </property>
            <property name="text">
-            <string>Trip: </string>
+            <string>Cave:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="TripComboBox">
+          <widget class="QComboBox" name="TargetCaveComboBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>1</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="TargetTripLayout">
+         <property name="spacing">
+          <number>-1</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="TargetTripLabel">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Trip:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="TargetTripComboBox">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>1</horstretch>
